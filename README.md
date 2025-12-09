@@ -39,9 +39,9 @@ python src/main.py
 
 Understanding how the code works is straightforward. Below is the full execution flow of the application.
 
-```mermaid
+
 graph TD
-    subgraph User Interface [src/main.py]
+   subgraph User Interface [src/main.py]
         Start([Start App]) --> InitUI[Initialize MainWindow]
         InitUI --> LoadCSS[Load styles.qss]
         LoadCSS --> WaitUser{User Action}
@@ -49,7 +49,7 @@ graph TD
         WaitUser -->|Click Convert| StartLoop[Start Conversion Loop]
     end
 
-    subgraph Conversion Logic [src/converter.py]
+   subgraph Conversion Logic [src/converter.py]
         StartLoop -->|For each file| ReadMD[Read .md File]
         ReadMD --> ParseMD[Parse Markdown to HTML]
         ParseMD -->|Extensions: Math, Mermaid| InjectHTML[Inject into HTML Template]
@@ -58,14 +58,13 @@ graph TD
         RenderJS -->|Wait 3s| PrintPDF[Print to PDF (QPageLayout)]
     end
     
-    subgraph Output
+   subgraph Output
         PrintPDF --> SavePDF[Save .pdf File]  <-- This connection line must follow clean.
         SavePDF --> UpdateUI[Update Progress Bar]
         UpdateUI --> CheckNext{More Files?}
         CheckNext -->|Yes| ReadMD
         CheckNext -->|No| Finish([Show Success Message])
     end
-```
 
 ## Code Breakdown
 
