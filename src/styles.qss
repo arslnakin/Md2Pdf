@@ -1,0 +1,116 @@
+/* Modern Dark Theme for Md2Pdf Converter */
+
+QMainWindow {
+    background-color: #1e1e2e;
+    color: #cdd6f4;
+}
+
+QWidget {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 14px;
+    color: #cdd6f4;
+}
+
+/* File List Area */
+QListWidget {
+    background-color: #262636; /* Slightly lighter than main bg */
+    border: 2px solid #313244;
+    border-radius: 8px;
+    padding: 10px;
+    outline: none;
+    color: #a6adc8;
+}
+
+QListWidget::item {
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+}
+
+QListWidget::item:selected {
+    background-color: #45475a;
+    color: #ffffff;
+    border: 1px solid #89b4fa;
+}
+
+QListWidget::item:hover {
+    background-color: #313244;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #313244;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    color: #cdd6f4;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #45475a;
+    border: 1px solid #585b70;
+}
+
+QPushButton:pressed {
+    background-color: #1e1e2e;
+}
+
+QPushButton#convertButton {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+QPushButton#convertButton:hover {
+    background-color: #b4befe;
+}
+
+QPushButton#deleteButton {
+    background-color: #f38ba8;
+    color: #1e1e2e;
+}
+
+QPushButton#deleteButton:hover {
+    background-color: #eba0ac;
+}
+
+/* Progress Bar */
+QProgressBar {
+    border: 2px solid #313244;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #1e1e2e;
+}
+
+QProgressBar::chunk {
+    background-color: #a6e3a1;
+    border-radius: 3px;
+}
+
+/* Labels */
+QLabel {
+    color: #bac2de;
+}
+
+QLabel#headerLabel {
+    font-size: 24px;
+    font-weight: bold;
+    color: #89b4fa;
+    margin-bottom: 10px;
+}
+
+/* GroupBox if used */
+QGroupBox {
+    border: 1px solid #313244;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+    color: #89b4fa;
+}
