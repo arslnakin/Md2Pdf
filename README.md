@@ -40,32 +40,51 @@ python src/main.py
 Understanding how the code works is straightforward. Below is the full execution flow of the application.
 
 
-graph TD
-   subgraph User Interface [src/main.py]
-        Start([Start App]) --> InitUI[Initialize MainWindow]
-        InitUI --> LoadCSS[Load styles.qss]
-        LoadCSS --> WaitUser{User Action}
-        WaitUser -->|Drag & Drop| AddToList[Add Files to List]
-        WaitUser -->|Click Convert| StartLoop[Start Conversion Loop]
-    end
-
-   subgraph Conversion Logic [src/converter.py]
-        StartLoop -->|For each file| ReadMD[Read .md File]
-        ReadMD --> ParseMD[Parse Markdown to HTML]
-        ParseMD -->|Extensions: Math, Mermaid| InjectHTML[Inject into HTML Template]
-        InjectHTML --> LoadWeb[Load into QWebEnginePage]
-        LoadWeb -->|LocalContentCanAccessRemoteUrls| RenderJS[Execute MathJax & Mermaid JS]
-        RenderJS -->|Wait 3s| PrintPDF[Print to PDF (QPageLayout)]
-    end
+```mermaid
+classDiagram
+    direction TB
     
-   subgraph Output
-        PrintPDF --> SavePDF[Save .pdf File]  <-- This connection line must follow clean.
-        SavePDF --> UpdateUI[Update Progress Bar]
-        UpdateUI --> CheckNext{More Files?}
-        CheckNext -->|Yes| ReadMD
-        CheckNext -->|No| Finish([Show Success Message])
-    end
+    class MainWindow {
+        + initUI()
+        + loadCSS()
+        + addFilesToList(file)
+        + startConversionLoop()
+        + updateProgressBar(progress)
+    }
 
+    class Converter {
+        + convertFile(filePath)
+        - readMarkdown(file)
+        - parseToHTML(mdContent)
+        - injectIntoTemplate(htmlContent)
+        - loadInWebEngine(content)
+        - renderScripts(page)
+        + printToPDF(page)
+    }
+
+    class FileSystem {
+        + savePDF(data, filePath)
+    }
+
+    %% İlişkiler (Bağımlılıklar/Kullanımlar) %%
+    
+    %% MainWindow Converter'ı kullanır
+    MainWindow ..> Converter : uses
+    
+    %% Converter, dosya işlemlerini (kaydetme) FileSystem'den ister
+    Converter ..> FileSystem : uses
+    
+    %% Converter, süreci tamamladıktan sonra UI'ı günceller
+    Converter --> MainWindow : updates(progress)
+    
+    %% FileSystem, çıktı verilerini depolar
+    FileSystem ..> Output : stores
+
+    class Output {
+        <<data>>
+        pdfFile : .pdf
+    }
+```
 ## Code Breakdown
 
 ### 1. `src/main.py` (The Frontend)
