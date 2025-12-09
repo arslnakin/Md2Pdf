@@ -57,9 +57,9 @@ graph TD
         LoadWeb -->|LocalContentCanAccessRemoteUrls| RenderJS[Execute MathJax & Mermaid JS]
         RenderJS -->|Wait 3s| PrintPDF[Print to PDF (QPageLayout)]
     end
-
+    
     subgraph Output
-        PrintPDF --> SavePDF[Save .pdf File]
+        PrintPDF --> SavePDF[Save .pdf File]  <-- This connection line must follow clean.
         SavePDF --> UpdateUI[Update Progress Bar]
         UpdateUI --> CheckNext{More Files?}
         CheckNext -->|Yes| ReadMD
