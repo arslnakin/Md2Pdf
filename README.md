@@ -1,110 +1,103 @@
-# Md2Pdf Converter
+# Md2Pdf Converter & Studio
 
-An advanced, modern desktop application built with Python and PyQt6 that converts Markdown (.md) documents into high-quality PDF files. It features support for **LaTeX mathematics** and **Mermaid diagrams**, making it perfect for technical documentation.
+**Md2Pdf** is a powerful all-in-one desktop application for creating, editing, and converting technical documentation. Built with **Python** and **PyQt6**, it combines a robust Markdown converter with a Feature-rich **AI-Assisted Editor**.
 
-## Features
+![Md2Pdf Logo](logo.png)
 
-*   **Modern UI**: Sleek dark theme interface built with PyQt6.
+## 🚀 Features
+
+### 📄 Conversion Functionality
+*   **Markdown to PDF**: Converts `.md` files to high-quality PDFs using the **Chromium-based** `QWebEngine` for pixel-perfect rendering.
+*   **PDF to DOCX**: Automatically convert generated PDFs into editable Microsoft Word (`.docx`) documents.
+*   **Batch Processing**: Convert multiple files simultaneously.
 *   **Rich Content Support**:
-    *   **LaTeX**: Renders mathematical formulas using MathJax (e.g., `$$ E=mc^2 $$`).
-    *   **Mermaid.js**: Automatically renders flowcharts, sequence diagrams, and gantt charts.
-    *   **Code Highlighting**: Syntax highlighting for code blocks.
-    *   **Tables & Images**: Full support for standard Markdown tables and images.
-*   **Batch Processing**: Convert multiple files at once.
-*   **Drag & Drop**: Easily add files by dragging them into the application window.
-*   **PDF Engine**: Uses the powerful Chromium-based `QWebEngine` for pixel-perfect rendering.
+    *   **LaTeX Math**: Renders complex formulas (e.g., `$$ E=mc^2 $$`) using MathJax.
+    *   **Mermaid Diagrams**: Renders Flowcharts, Sequence diagrams, Gantt charts, etc.
+    *   **Syntax Highlighting**: Beautiful code blocks for all languages.
 
-## Installation
+### ✍️ Md2Pdf Studio (Integrated Editor)
+Double-click any file or create a **New File** to enter the **Studio Mode**:
+*   **3-Pane Layout**:
+    1.  **Live Preview**: Real-time rendering of your document (Left).
+    2.  **Canvas (Editor)**: A distraction-free coding environment (Center).
+    3.  **AI Assistant**: A built-in Chatbot (Right).
+*   **AI-Powered Editing (Canvas Mode)**:
+    *   **Canvas Mode (✏️)**: When enabled, the AI Assistant has "write access" to your editor. You can ask it to *"Translate this to English"*, *"Fix bugs in the code"*, or *"Rewrite the introduction"*, and it will update the text directly in the editor.
+    *   **Chat Mode**: When Canvas is disabled, the AI only reads and advises.
+*   **Multi-Provider AI**: Supports **Google Gemini** and **OpenRouter** (GPT-4, Claude, etc.).
+*   **Advanced Toolbar**: Quick formatting, specific Insert buttons, and toggle controls for panels.
+*   **Find & Replace**: Full search functionality within the editor.
 
-1.  Ensure you have Python 3.8+ installed.
-2.  Install the required dependencies:
+## 🛠️ Installation
 
-```bash
-pip install -r requirements.txt
-```
+1.  **Prerequisites**: Python 3.8+ installed.
+2.  **Install Dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Usage
+## 🖥️ Usage
 
 Run the application:
-
 ```bash
 python src/main.py
 ```
 
-1.  **Add Files**: Drag and drop your `.md` files or use the generic "Add File" button.
-2.  **Select Output (Optional)**: Choose a specific folder for PDFs, or leave default (same folder as source).
-3.  **Convert**: Click "Convert to PDF" and wait for the process to complete.
+### Conversion Workflow
+1.  **Add Files**: Drag & drop `.md` files into the list.
+2.  **Options**:
+    *   Check **"Convert to Word (.docx)"** if you need Word output.
+    *   Select an Output Directory (optional).
+3.  **Convert**: Click the main button to process all files.
 
-## Architecture & Workflow
+### Editor Workflow
+1.  **Open Editor**: Double-click a file in the list or click **"Yeni Dosya"** (New File).
+2.  **Setup AI**: Click the **Settings (⚙️)** icon in the toolbar.
+    *   Select Provider (Google Gemini or OpenRouter).
+    *   Enter your API Key.
+3.  **Edit & Interact**:
+    *   Type Markdown in the center pane.
+    *   Watch the **Live Preview** on the left.
+    *   Chat with the **AI Assistant** on the right.
+    *   Toggle **Canvas Mode (✏️)** in the toolbar to let the AI write for you.
 
-Understanding how the code works is straightforward. Below is the full execution flow of the application.
-
+## 🏗️ Architecture
 
 ```mermaid
 classDiagram
     direction TB
     
     class MainWindow {
-        + initUI()
-        + loadCSS()
-        + addFilesToList(file)
-        + startConversionLoop()
-        + updateProgressBar(progress)
+        + Add/Remove Files
+        + Drag & Drop
+        + Batch Convert
+        + Open Editor (Studio)
+    }
+
+    class EditorWindow {
+        + 3-Pane Layout
+        + Live Preview (QWebEngine)
+        + Chatbot (Threaded)
+        + Canvas Mode Logic
     }
 
     class Converter {
-        + convertFile(filePath)
-        - readMarkdown(file)
-        - parseToHTML(mdContent)
-        - injectIntoTemplate(htmlContent)
-        - loadInWebEngine(content)
-        - renderScripts(page)
-        + printToPDF(page)
+        + Markdown -> HTML
+        + HTML -> PDF (QWebEngine)
+        + PDF -> DOCX (pdf2docx)
     }
 
-    class FileSystem {
-        + savePDF(data, filePath)
-    }
-
-    %% İlişkiler (Bağımlılıklar/Kullanımlar) %%
-    
-    %% MainWindow Converter'ı kullanır
-    MainWindow ..> Converter : uses
-    
-    %% Converter, dosya işlemlerini (kaydetme) FileSystem'den ister
-    Converter ..> FileSystem : uses
-    
-    %% Converter, süreci tamamladıktan sonra UI'ı günceller
-    Converter --> MainWindow : updates(progress)
-    
-    %% FileSystem, çıktı verilerini depolar
-    FileSystem ..> Output : stores
-
-    class Output {
-        <<data>>
-        pdfFile : .pdf
-    }
+    MainWindow --> Converter : uses
+    MainWindow --> EditorWindow : opens
+    EditorWindow --> Converter : uses (for preview)
+    EditorWindow --> AI_API : requests (Gemini/OpenRouter)
 ```
-## Code Breakdown
 
-### 1. `src/main.py` (The Frontend)
-*   **`MainWindow`**: This is the main class inheriting from `QMainWindow`. It sets up the layout, buttons, and list widget.
-*   **`load_stylesheet()`**: Loads the CSS file to give the app its dark theme.
-*   **`start_conversion()`**: This method is triggered when you click the convert button. It locks the UI, sets up the progress bar, and loops through the selected files. Inside the loop, calls `processEvents()` to keep the window responsive while calling the converter.
+## 📦 Requirements
 
-### 2. `src/converter.py` (The Backend)
-*   **`Md2PdfConverter`**: The core class responsible for handling the file conversion.
-*   **Markdown Parsing**: Uses the `markdown` library with `pymdownx` extensions to convert text into HTML. It enables features like `arithmatex` (Math) and `superfences` (Mermaid blocks).
-*   **HTML Template**: Wraps the converted content in a robust HTML structure that includes CDN links for **MathJax** and **Mermaid.js**.
-*   **QWebEngine**: This is the secret sauce. Instead of a basic PDF writer, we spin up a headless web browser instance (`QWebEnginePage`).
-    *   It loads the HTML.
-    *   It waits (via `QTimer` & `QEventLoop`) for the JavaScript (MathJax/Mermaid) to finish rendering the diagrams.
-    *   Finally, it uses `printToPdf` to capture the rendered page as a PDF file.
-
-## Requirements
-
-*   `PyQt6`
-*   `PyQt6-WebEngine`
-*   `Markdown`
-*   `Pymdown-extensions`
-*   `Pygments`
+*   `PyQt6` (GUI)
+*   `PyQt6-WebEngine` (Rendering)
+*   `Markdown` (Parsing)
+*   `pdf2docx` (Word Conversion)
+*   `requests` (API Calls)
+*   `pymdown-extensions` (Math/Mermaid support)

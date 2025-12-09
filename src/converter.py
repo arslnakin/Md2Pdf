@@ -5,6 +5,7 @@ import markdown
 import os
 import pymdownx.superfences
 import pymdownx.arithmatex
+from pdf2docx import Converter
 
 class Md2PdfConverter:
     def __init__(self):
@@ -218,6 +219,24 @@ class Md2PdfConverter:
             
         except Exception as e:
             print(f"PDF Dönüştürme Hatası: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def convert_to_docx(self, pdf_path, docx_path=None):
+        """Converts a PDF file to a DOCX file using pdf2docx"""
+        if not docx_path:
+            docx_path = os.path.splitext(pdf_path)[0] + ".docx"
+            
+        try:
+            # Suppress some console output from pdf2docx if possible, or just run
+            print(f"Converting PDF to Word: {pdf_path} -> {docx_path}")
+            cv = Converter(pdf_path)
+            cv.convert(docx_path)
+            cv.close()
+            return True
+        except Exception as e:
+            print(f"DOCX Conversion Error: {e}")
             import traceback
             traceback.print_exc()
             return False

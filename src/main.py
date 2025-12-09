@@ -2,16 +2,17 @@ import sys
 import os
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QPushButton, QListWidget, QFileDialog, 
-                             QLabel, QProgressBar, QMessageBox, QFrame)
+                             QLabel, QProgressBar, QMessageBox, QFrame, QCheckBox)
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QIcon, QDragEnterEvent, QDropEvent
+from PyQt6.QtGui import QIcon, QDragEnterEvent, QDropEvent, QPixmap
 
 from converter import Md2PdfConverter
+from editor import EditorWindow
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("MD'den PDF'e Çevirici")
+        self.setWindowTitle("Md2PDF")
         self.setGeometry(100, 100, 800, 600)
         self.setAcceptDrops(True)
         
@@ -24,6 +25,19 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(main_widget)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(15)
+
+
+        # Logo
+        logo_label = QLabel()
+        project_root = os.path.dirname(os.path.dirname(__file__))
+        logo_path = os.path.join(project_root, "logo.png")
+        if os.path.exists(logo_path):
+            pixmap = QPixmap(logo_path)
+            pixmap = pixmap.scaledToHeight(60, Qt.TransformationMode.SmoothTransformation)
+            logo_label.setPixmap(pixmap)
+            logo_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            logo_label.setStyleSheet("padding-left: 5px;")
+            layout.addWidget(logo_label)
 
         # Header
         header = QLabel("MD Dosyalarınızı Dönüştürün")
@@ -40,6 +54,7 @@ class MainWindow(QMainWindow):
         # File List
         self.file_list = QListWidget()
         self.file_list.setSelectionMode(QListWidget.SelectionMode.ExtendedSelection)
+        self.file_list.itemDoubleClicked.connect(self.edit_file)
         layout.addWidget(self.file_list)
 
         # Buttons Layout
@@ -56,6 +71,11 @@ class MainWindow(QMainWindow):
         self.btn_clear.clicked.connect(self.file_list.clear)
 
         btn_layout.addWidget(self.btn_add)
+        
+        self.btn_new = QPushButton("Yeni Dosya")
+        self.btn_new.clicked.connect(self.new_file)
+        btn_layout.addWidget(self.btn_new)
+        
         btn_layout.addWidget(self.btn_remove)
         btn_layout.addWidget(self.btn_clear)
         layout.addLayout(btn_layout)
@@ -68,10 +88,14 @@ class MainWindow(QMainWindow):
         self.btn_select_output = QPushButton("Çıktı Klasörü Seç")
         self.btn_select_output.clicked.connect(self.select_output_dir)
         
-        dir_layout.addWidget(self.lbl_output)
         dir_layout.addStretch()
         dir_layout.addWidget(self.btn_select_output)
         layout.addLayout(dir_layout)
+
+        # Checkbox for Word Conversion
+        self.chk_docx = QCheckBox("Word (.docx) formatına da dönüştür")
+        self.chk_docx.setStyleSheet("color: #bac2de; font-size: 13px;")
+        layout.addWidget(self.chk_docx)
 
         # Separator
         line = QFrame()
@@ -141,6 +165,15 @@ class MainWindow(QMainWindow):
             self.output_dir = directory
             self.lbl_output.setText(f"Çıktı: {directory}")
 
+    def edit_file(self, item):
+        file_path = item.text()
+        self.editor_window = EditorWindow(file_path, self)
+        self.editor_window.show()
+
+    def new_file(self):
+        self.editor_window = EditorWindow(None, self)
+        self.editor_window.show()
+
     def start_conversion(self):
         if self.file_list.count() == 0:
             QMessageBox.warning(self, "Uyarı", "Lütfen dönüştürülecek dosya ekleyin.")
@@ -160,14 +193,26 @@ class MainWindow(QMainWindow):
             self.status_label.setText(f"Dönüştürülüyor: {filename}...")
             QApplication.processEvents() # Keep UI responsive
             
-            output_path = None
+            # Determine Output Path
             if self.output_dir:
-                base_name = os.path.splitext(filename)[0] + ".pdf"
-                output_path = os.path.join(self.output_dir, base_name)
+                pdf_dir = self.output_dir
+            else:
+                pdf_dir = os.path.dirname(file_path)
+                
+            base_name = os.path.splitext(filename)[0] + ".pdf"
+            output_path = os.path.join(pdf_dir, base_name)
             
             success = self.converter.convert(file_path, output_path)
             
-            if not success:
+            if success:
+                if self.chk_docx.isChecked():
+                    self.status_label.setText(f"Word'e çevriliyor: {filename}...")
+                    QApplication.processEvents()
+                    try:
+                        self.converter.convert_to_docx(output_path)
+                    except Exception as e:
+                        print(f"DOCX Hata: {e}")
+            else:
                print(f"Hata: {filename}")
             
             self.progress_bar.setValue(int(((i + 1) / total) * 100))
